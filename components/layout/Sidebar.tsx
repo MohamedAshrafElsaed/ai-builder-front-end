@@ -9,10 +9,10 @@ import { useEffect } from "react";
 const NAV_ITEMS = [
     { label: "Overview", href: "/app", icon: HomeIcon },
     { label: "Projects", href: "/app/projects", icon: FolderIcon },
-    { label: "UI Designer", href: "/app/ui-designer", icon: PaletteIcon, badge: "AI" },
+    { label: "UI Designer", href: "/app/ui-designer", icon: PaletteIcon},
     { label: "Chat", href: "/app/chat", icon: ChatIcon },
-    { label: "Settings", href: "/app/settings", icon: CogIcon },
-    { label: "Billing", href: "/app/billing", icon: CreditCardIcon },
+    // { label: "Settings", href: "/app/settings", icon: CogIcon },
+    // { label: "Billing", href: "/app/billing", icon: CreditCardIcon },
 ];
 
 export function Sidebar() {
