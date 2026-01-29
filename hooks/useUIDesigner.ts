@@ -27,7 +27,7 @@ export function useUIDesigner(projectId: string) {
     const fetchAgent = useCallback(async () => {
         try {
             // Agent endpoint: GET /projects/agent (no project ID)
-            const data = await api.get<{ success: boolean; agent: Agent }>(`/projects/agent`);
+            const data = await api.get<{ success: boolean; agent: Agent }>(`/ui-designer/agent`);
             if (data.success && data.agent) {
                 store.setAgent(data.agent);
                 store.addMessage('agent_greeting', getGreeting(data.agent), { thought: data.agent.personality });
@@ -35,12 +35,12 @@ export function useUIDesigner(projectId: string) {
         } catch (err) {
             console.error('Failed to fetch agent:', err);
         }
-    }, [api]);
+    }, [api, store]);
 
     const fetchTechStack = useCallback(async () => {
         try {
             // Tech stack endpoint: GET /projects/{project_id}/tech-stack
-            const data = await api.get<{ success: boolean; tech_stack: TechStack }>(`/projects/${projectId}/tech-stack`);
+            const data = await api.get<{ success: boolean; tech_stack: TechStack }>(`/ui-designer/${projectId}/tech-stack`);
             if (data.success && data.tech_stack) {
                 store.setTechStack(data.tech_stack);
                 store.addMessage('tech_detected', 'Detected your project technology stack.', {
@@ -64,7 +64,7 @@ export function useUIDesigner(projectId: string) {
         try {
             const token = authService.getAccessToken();
             // Design endpoint: POST /projects/{project_id}/design
-            const response = await fetch(`${API_BASE}/projects/${projectId}/design`, {
+            const response = await fetch(`${API_BASE}/ui-designer/${projectId}/design`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ export function useUIDesigner(projectId: string) {
         if (designId) {
             try {
                 // Cancel endpoint: DELETE /projects/{project_id}/design/{design_id}
-                await api.delete(`/projects/${projectId}/design/${designId}`);
+                await api.delete(`/ui-designer/${projectId}/design/${designId}`);
             } catch (err) {
                 console.error('Failed to cancel on server:', err);
             }
@@ -137,7 +137,7 @@ export function useUIDesigner(projectId: string) {
         try {
             const files = selectedFiles || Array.from(store.selectedFilesForApply);
             // Apply endpoint: POST /projects/{project_id}/design/{design_id}/apply
-            const result = await api.post<ApplyResult>(`/projects/${projectId}/design/${designId}/apply`, {
+            const result = await api.post<ApplyResult>(`/ui-designer/${projectId}/design/${designId}/apply`, {
                 design_id: designId,
                 selected_files: files.length > 0 ? files : null,
                 backup: true,

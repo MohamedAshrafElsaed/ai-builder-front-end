@@ -1,11 +1,10 @@
-// components/ui-designer/ChatPanel.tsx
 "use client";
 
-import { useRef, useEffect, useState, KeyboardEvent } from 'react';
-import { Agent, Message, TechStack, DesignStatus } from '@/types/ui-designer';
-import { MessageBubble } from './MessageBubble';
-import { ThinkingIndicator } from './ThinkingIndicator';
-import { TechStackBadge } from './TechStackBadge';
+import {KeyboardEvent, useEffect, useRef, useState} from 'react';
+import {Agent, DesignStatus, Message, TechStack} from '@/types/ui-designer';
+import {MessageBubble} from './MessageBubble';
+import {ThinkingIndicator} from './ThinkingIndicator';
+import {TechStackBadge} from './TechStackBadge';
 
 interface ChatPanelProps {
     agent: Agent | null;
@@ -19,46 +18,32 @@ interface ChatPanelProps {
 }
 
 const SUGGESTIONS = [
-    "Create a dashboard with stats cards and charts",
-    "Design a settings page with form sections",
-    "Build a data table with sorting and filtering",
-    "Create a sidebar navigation component",
-    "Design a modal dialog with form inputs",
-    "Build a file upload component with preview",
+    "Dashboard with stats cards",
+    "Settings page with forms",
+    "Data table with filters",
+    "Sidebar navigation",
 ];
 
-export function ChatPanel({
-                              agent,
-                              messages,
-                              currentThought,
-                              techStack,
-                              status,
-                              isGenerating,
-                              onSendMessage,
-                              onCancel,
-                          }: ChatPanelProps) {
+export function ChatPanel(
+    {
+        agent,
+        messages,
+        currentThought,
+        techStack,
+        status,
+        isGenerating,
+        onSendMessage,
+        onCancel,
+    }: ChatPanelProps) {
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
-    const [userScrolled, setUserScrolled] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Auto-scroll to bottom (smart scroll)
     useEffect(() => {
-        if (!userScrolled && messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [messages, currentThought, userScrolled]);
+        messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
+    }, [messages, currentThought]);
 
-    // Handle scroll detection
-    const handleScroll = () => {
-        if (!containerRef.current) return;
-        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-        const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
-        setUserScrolled(!isAtBottom);
-    };
-
-    // Focus input on keyboard shortcut
     useEffect(() => {
         const handleKeyDown = (e: globalThis.KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -75,164 +60,123 @@ export function ChatPanel({
         if (!trimmed || isGenerating) return;
         onSendMessage(trimmed);
         setInput('');
-        setUserScrolled(false);
     };
 
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSubmit();
         }
     };
 
-    const handleSuggestion = (suggestion: string) => {
-        setInput(suggestion);
-        inputRef.current?.focus();
-    };
-
     return (
-        <div className="flex flex-col h-full bg-[#0a0a0a]">
-            {/* Chat Header */}
-            <ChatHeader agent={agent} status={status} />
-
-            {/* Messages */}
-            <div
-                ref={containerRef}
-                className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin"
-                onScroll={handleScroll}
-            >
-                {/* Tech Stack Badge */}
-                {techStack && <TechStackBadge techStack={techStack} />}
-
-                {/* Messages */}
-                {messages.map((message) => (
-                    <MessageBubble
-                        key={message.id}
-                        message={message}
-                        agent={agent}
-                    />
-                ))}
-
-                {/* Thinking Indicator */}
-                {currentThought && status !== 'complete' && (
-                    <ThinkingIndicator thought={currentThought} agent={agent} />
-                )}
-
-                {/* Suggestions (show when idle and no messages) */}
-                {status === 'idle' && messages.length <= 2 && (
-                    <div className="space-y-2 pt-4">
-                        <p className="text-xs text-zinc-500 font-medium">Try these:</p>
-                        <div className="flex flex-wrap gap-2">
-                            {SUGGESTIONS.slice(0, 4).map((suggestion, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => handleSuggestion(suggestion)}
-                                    className="px-3 py-2 text-xs text-zinc-400 bg-[#1a1a1a] border border-[#262626] rounded-lg hover:bg-[#262626] hover:text-zinc-300 transition-all"
-                                >
-                                    {suggestion}
-                                </button>
-                            ))}
+        <div className="flex flex-col h-full bg-[#09090b]">
+            {/* Header */}
+            <div className="flex-shrink-0 px-4 py-3 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <div
+                            className="w-9 h-9 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-violet-500/20 flex items-center justify-center ring-1 ring-white/10">
+                            <span className="text-base">{agent?.avatar_emoji || '🎨'}</span>
                         </div>
+                        <div
+                            className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#09090b] ${
+                                status === 'generating' ? 'bg-fuchsia-500 animate-pulse' :
+                                    status === 'complete' ? 'bg-emerald-500' :
+                                        status === 'error' ? 'bg-red-500' : 'bg-zinc-600'
+                            }`}/>
                     </div>
-                )}
-
-                <div ref={messagesEndRef} />
+                    <div>
+                        <h2 className="text-sm font-medium text-zinc-100">{agent?.name || 'Palette'}</h2>
+                        <p className="text-[11px] text-zinc-500">{
+                            status === 'generating' ? 'Generating...' :
+                                status === 'complete' ? 'Ready' : 'Online'
+                        }</p>
+                    </div>
+                </div>
             </div>
 
-            {/* Input Area */}
-            <div className="flex-shrink-0 p-4 border-t border-[#1f1f1f] bg-[#0a0a0a]">
-                <div className="relative">
+            {/* Messages */}
+            <div ref={containerRef} className="flex-1 overflow-y-auto scrollbar-thin">
+                <div className="px-4 py-4 space-y-4">
+                    {techStack && <TechStackBadge techStack={techStack}/>}
+
+                    {messages.map((message) => (
+                        <MessageBubble key={message.id} message={message} agent={agent}/>
+                    ))}
+
+                    {currentThought && status !== 'complete' && (
+                        <ThinkingIndicator thought={currentThought} agent={agent}/>
+                    )}
+
+                    {status === 'idle' && messages.length <= 2 && (
+                        <div className="pt-6">
+                            <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-3">Quick start</p>
+                            <div className="flex flex-wrap gap-2">
+                                {SUGGESTIONS.map((s, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => {
+                                            setInput(s);
+                                            inputRef.current?.focus();
+                                        }}
+                                        className="px-3 py-1.5 text-xs text-zinc-500 bg-white/[0.02] border border-white/5 rounded-full hover:bg-white/[0.05] hover:text-zinc-300 hover:border-white/10 transition-all"
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div ref={messagesEndRef}/>
+                </div>
+            </div>
+
+            {/* Input */}
+            <div className="flex-shrink-0 p-3 border-t border-white/5">
+                <div
+                    className="relative flex items-end gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-xl focus-within:border-fuchsia-500/30 focus-within:bg-white/[0.03] transition-all">
                     <textarea
                         ref={inputRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Describe the UI you want to create..."
+                        placeholder="Describe the UI..."
                         disabled={isGenerating}
-                        rows={3}
-                        className="w-full px-4 py-3 pr-24 bg-[#141414] border border-[#262626] rounded-lg text-sm text-zinc-100 placeholder:text-zinc-600 resize-none focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/20 disabled:opacity-50 transition-all"
+                        rows={1}
+                        className="flex-1 px-3 py-2 bg-transparent text-sm text-zinc-100 placeholder:text-zinc-600 resize-none focus:outline-none disabled:opacity-50"
+                        style={{minHeight: '40px', maxHeight: '100px'}}
+                        onInput={(e) => {
+                            const t = e.target as HTMLTextAreaElement;
+                            t.style.height = '40px';
+                            t.style.height = Math.min(t.scrollHeight, 100) + 'px';
+                        }}
                     />
-
-                    <div className="absolute right-2 bottom-2 flex items-center gap-2">
-                        {isGenerating ? (
-                            <button
-                                onClick={onCancel}
-                                className="px-3 py-1.5 text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/20 rounded-md hover:bg-red-500/20 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleSubmit}
-                                disabled={!input.trim()}
-                                className="px-4 py-1.5 text-xs font-medium text-white bg-pink-600 rounded-md hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
-                            >
-                                <span>Send</span>
-                                <kbd className="text-[10px] opacity-60">⌘↵</kbd>
-                            </button>
-                        )}
-                    </div>
+                    {isGenerating ? (
+                        <button
+                            onClick={onCancel}
+                            className="p-2 m-1 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                 strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleSubmit}
+                            disabled={!input.trim()}
+                            className="p-2 m-1 bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                 strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round"
+                                      d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+                            </svg>
+                        </button>
+                    )}
                 </div>
-
-                <p className="mt-2 text-[10px] text-zinc-600 text-center">
-                    Press <kbd className="px-1 py-0.5 bg-[#1a1a1a] rounded text-zinc-500">⌘ + Enter</kbd> to send
-                </p>
-            </div>
-        </div>
-    );
-}
-
-interface ChatHeaderProps {
-    agent: Agent | null;
-    status: DesignStatus;
-}
-
-function ChatHeader({ agent, status }: ChatHeaderProps) {
-    const statusColors: Record<DesignStatus, string> = {
-        idle: 'bg-zinc-500',
-        connecting: 'bg-yellow-500 animate-pulse',
-        detecting: 'bg-blue-500 animate-pulse',
-        optimizing: 'bg-purple-500 animate-pulse',
-        generating: 'bg-pink-500 animate-pulse',
-        complete: 'bg-green-500',
-        error: 'bg-red-500',
-        cancelled: 'bg-zinc-500',
-    };
-
-    const statusLabels: Record<DesignStatus, string> = {
-        idle: 'Ready',
-        connecting: 'Connecting...',
-        detecting: 'Detecting stack...',
-        optimizing: 'Optimizing...',
-        generating: 'Generating...',
-        complete: 'Complete',
-        error: 'Error',
-        cancelled: 'Cancelled',
-    };
-
-    return (
-        <div className="flex-shrink-0 h-16 flex items-center gap-3 px-4 border-b border-[#1f1f1f] bg-[#141414]">
-            {/* Agent Avatar */}
-            <div className="relative">
-                <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
-                    style={{ backgroundColor: agent?.color ? `${agent.color}20` : '#ec489920' }}
-                >
-                    {agent?.avatar_emoji || '🎨'}
-                </div>
-                <div
-                    className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#141414] ${statusColors[status]}`}
-                />
-            </div>
-
-            {/* Agent Info */}
-            <div className="flex-1 min-w-0">
-                <h2 className="text-sm font-semibold text-zinc-100 truncate">
-                    {agent?.name || 'Palette'}
-                </h2>
-                <p className="text-xs text-zinc-500">
-                    {statusLabels[status]}
-                </p>
             </div>
         </div>
     );

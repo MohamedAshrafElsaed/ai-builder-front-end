@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useUIDesigner } from '@/hooks/useUIDesigner';
 import { ChatPanel } from './ChatPanel';
 import { PreviewPanel } from './PreviewPanel';
@@ -12,25 +13,23 @@ interface UIDesignerLayoutProps {
 }
 
 export function UIDesignerLayout({ projectId }: UIDesignerLayoutProps) {
+    const router = useRouter();
     const designer = useUIDesigner(projectId);
-    const [leftWidth, setLeftWidth] = useState(380);
+    const [leftWidth, setLeftWidth] = useState(400);
     const [isMobile, setIsMobile] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
 
-    // Handle responsive layout
     useEffect(() => {
         const checkMobile = () => {
             const mobile = window.innerWidth < 1024;
             setIsMobile(mobile);
             if (!mobile) setShowPreview(false);
         };
-
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Handle keyboard shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 's') {
@@ -42,41 +41,25 @@ export function UIDesignerLayout({ projectId }: UIDesignerLayoutProps) {
             if (e.key === 'Escape' && designer.isGenerating) {
                 designer.cancelGeneration();
             }
-            if ((e.metaKey || e.ctrlKey) && e.key === '1') {
-                e.preventDefault();
-                designer.setActiveTab('preview');
-            }
-            if ((e.metaKey || e.ctrlKey) && e.key === '2') {
-                e.preventDefault();
-                designer.setActiveTab('code');
-            }
-            if ((e.metaKey || e.ctrlKey) && e.key === '3') {
-                e.preventDefault();
-                designer.setActiveTab('files');
-            }
         };
-
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [designer]);
 
     const handleResize = useCallback((delta: number) => {
-        setLeftWidth((prev) => Math.max(320, Math.min(600, prev + delta)));
+        setLeftWidth((prev) => Math.max(340, Math.min(600, prev + delta)));
     }, []);
 
-    // Mobile view toggle
     if (isMobile) {
         return (
-            <div className="flex flex-col h-screen bg-[#0a0a0a]">
-                {/* Header */}
+            <div className="fixed inset-0 z-50 flex flex-col bg-[#09090b]">
                 <DesignerHeader
                     projectId={projectId}
+                    onBack={() => router.push('/app/ui-designer')}
                     showToggle
                     showPreview={showPreview}
                     onToggle={() => setShowPreview(!showPreview)}
                 />
-
-                {/* Content */}
                 <div className="flex-1 overflow-hidden">
                     {showPreview ? (
                         <PreviewPanel
@@ -103,8 +86,6 @@ export function UIDesignerLayout({ projectId }: UIDesignerLayoutProps) {
                         />
                     )}
                 </div>
-
-                {/* Action Bar */}
                 <ActionBar
                     status={designer.status}
                     generatedFiles={designer.generatedFiles}
@@ -121,16 +102,11 @@ export function UIDesignerLayout({ projectId }: UIDesignerLayoutProps) {
         );
     }
 
-    // Desktop view
     return (
-        <div className="flex flex-col h-screen bg-[#0a0a0a]">
-            {/* Header */}
-            <DesignerHeader projectId={projectId} />
-
-            {/* Main Content */}
+        <div className="fixed inset-0 z-50 flex flex-col bg-[#09090b]">
+            <DesignerHeader projectId={projectId} onBack={() => router.push('/app/ui-designer')} />
             <div className="flex-1 flex overflow-hidden">
-                {/* Chat Panel */}
-                <div style={{ width: leftWidth }} className="flex-shrink-0 border-r border-[#262626]">
+                <div style={{ width: leftWidth }} className="flex-shrink-0 border-r border-white/5">
                     <ChatPanel
                         agent={designer.agent}
                         messages={designer.messages}
@@ -142,11 +118,7 @@ export function UIDesignerLayout({ projectId }: UIDesignerLayoutProps) {
                         onCancel={designer.cancelGeneration}
                     />
                 </div>
-
-                {/* Resizable Divider */}
                 <ResizableDivider onResize={handleResize} />
-
-                {/* Preview Panel */}
                 <div className="flex-1 overflow-hidden">
                     <PreviewPanel
                         activeTab={designer.activeTab}
@@ -161,8 +133,6 @@ export function UIDesignerLayout({ projectId }: UIDesignerLayoutProps) {
                     />
                 </div>
             </div>
-
-            {/* Action Bar */}
             <ActionBar
                 status={designer.status}
                 generatedFiles={designer.generatedFiles}
@@ -181,38 +151,39 @@ export function UIDesignerLayout({ projectId }: UIDesignerLayoutProps) {
 
 interface DesignerHeaderProps {
     projectId: string;
+    onBack: () => void;
     showToggle?: boolean;
     showPreview?: boolean;
     onToggle?: () => void;
 }
 
-function DesignerHeader({ projectId, showToggle, showPreview, onToggle }: DesignerHeaderProps) {
+function DesignerHeader({ projectId, onBack, showToggle, showPreview, onToggle }: DesignerHeaderProps) {
     return (
-        <header className="h-14 flex-shrink-0 flex items-center justify-between px-4 border-b border-[#262626] bg-[#141414]">
-            <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                    <span className="text-2xl">🎨</span>
-                    <div>
-                        <h1 className="text-sm font-semibold text-zinc-100">UI Designer</h1>
-                        <p className="text-xs text-zinc-500">Project: {projectId}</p>
-                    </div>
+        <header className="h-12 flex-shrink-0 flex items-center justify-between px-3 border-b border-white/5 bg-[#09090b]">
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={onBack}
+                    className="p-1.5 -ml-1 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-colors"
+                >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-fuchsia-500 to-violet-600 flex items-center justify-center shadow-lg shadow-fuchsia-500/20">
+                    <span className="text-xs">✨</span>
                 </div>
+                <span className="text-sm font-medium text-zinc-100">UI Designer</span>
             </div>
 
             <div className="flex items-center gap-2">
                 {showToggle && (
                     <button
                         onClick={onToggle}
-                        className="px-3 py-1.5 text-xs font-medium rounded-md bg-[#262626] text-zinc-300 hover:bg-[#333] transition-colors"
+                        className="px-2.5 py-1 text-xs font-medium rounded-md bg-white/5 text-zinc-400 hover:text-zinc-200 hover:bg-white/10 transition-colors"
                     >
-                        {showPreview ? 'Show Chat' : 'Show Code'}
+                        {showPreview ? 'Chat' : 'Code'}
                     </button>
                 )}
-
-                <div className="flex items-center gap-1 text-xs text-zinc-500">
-                    <kbd className="px-1.5 py-0.5 rounded bg-[#262626] text-zinc-400">⌘K</kbd>
-                    <span>Focus</span>
-                </div>
             </div>
         </header>
     );

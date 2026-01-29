@@ -47,16 +47,16 @@ const SYNTAX_PATTERNS: Record<string, { pattern: RegExp; className: string }[]> 
     ],
 };
 
-export function CodeViewer({ code, language, isStreaming = false }: CodeViewerProps) {
+export function CodeViewer({ code = '', language, isStreaming = false }: CodeViewerProps) {
     const containerRef = useRef<HTMLPreElement>(null);
     const prevLengthRef = useRef(0);
 
     // Auto-scroll when streaming
     useEffect(() => {
-        if (isStreaming && containerRef.current && code.length > prevLengthRef.current) {
+        if (isStreaming && containerRef.current && code && code.length > prevLengthRef.current) {
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
-        prevLengthRef.current = code.length;
+        prevLengthRef.current = code?.length || 0;
     }, [code, isStreaming]);
 
     // Apply syntax highlighting

@@ -1,4 +1,3 @@
-// components/layout/Sidebar.tsx - Updated with UI Designer link
 "use client";
 
 import Link from "next/link";
@@ -64,7 +63,9 @@ function NavContent({ collapsed }: { collapsed: boolean }) {
     return (
         <nav className="flex-1 space-y-1 p-3">
             {NAV_ITEMS.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                const isActive = item.href === "/app"
+                    ? pathname === "/app"
+                    : pathname === item.href || pathname.startsWith(item.href + '/');
                 return (
                     <Link
                         key={item.href}
