@@ -3,20 +3,55 @@
 import { useApp } from "@/context/AppContext";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/Button";
-import { authService, AuthSession } from "@/lib/auth";
+import { authService, User } from "@/lib/auth";
+import { apiClient } from "@/lib/apiClient";
 import { useEffect, useState } from "react";
+
+interface MeResponse {
+    user: User;
+    personal_team?: {
+        id: string;
+        name: string;
+        slug: string;
+        is_personal: boolean;
+    };
+}
 
 export function Topbar() {
     const { toggleSidebar, openDrawer } = useApp();
-    const [session, setSession] = useState<AuthSession | null>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const pathname = usePathname();
 
     useEffect(() => {
-        // Load session from local storage via AuthService
-        setSession(authService.getSession());
-    }, []);
+        const loadUser = async () => {
+            // First check if we have cached user
+            const cachedUser = authService.getUser();
+            if (cachedUser) {
+                setUser(cachedUser);
+                setIsLoading(false);
+                return;
+            }
 
-    const user = session?.user;
+            // If authenticated but no user cached, fetch from API
+            if (authService.isAuthenticated()) {
+                try {
+                    const response = await apiClient.get<MeResponse>("/auth/me");
+                    if (response.user) {
+                        authService.setUser(response.user);
+                        setUser(response.user);
+                    }
+                } catch (error) {
+                    console.error("[TOPBAR] Failed to fetch user:", error);
+                    // Token might be invalid
+                    authService.logout();
+                }
+            }
+            setIsLoading(false);
+        };
+
+        loadUser();
+    }, []);
 
     // Simple breadcrumb logic
     const segments = pathname.split("/").filter(Boolean);
@@ -49,17 +84,19 @@ export function Topbar() {
             </div>
 
             <div className="flex items-center gap-4">
-                {user && (
+                {isLoading ? (
+                    <div className="h-8 w-8 rounded-full bg-bg-elevated animate-pulse" />
+                ) : user ? (
                     <div className="flex items-center gap-3">
                         <span className="hidden text-sm text-text-secondary sm:inline-block">
-                            {user.name}
+                            {user.username || user.name}
                         </span>
                         <div className="h-8 w-8 overflow-hidden rounded-full border border-border-default bg-bg-elevated">
                             {user.avatar_url ? (
-                                <img src={user.avatar_url} alt={user.name || "User"} className="h-full w-full object-cover" />
+                                <img src={user.avatar_url} alt={user.username || "User"} className="h-full w-full object-cover" />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center bg-accent-primary/10 text-xs font-medium text-accent-primary">
-                                    {user.name?.charAt(0) || "U"}
+                                    {(user.username || user.name || "U").charAt(0).toUpperCase()}
                                 </div>
                             )}
                         </div>
@@ -72,7 +109,7 @@ export function Topbar() {
                             Log out
                         </Button>
                     </div>
-                )}
+                ) : null}
             </div>
         </header>
     );

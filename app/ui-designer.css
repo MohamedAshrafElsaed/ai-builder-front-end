@@ -1,0 +1,226 @@
+/* app/ui-designer.css - Additional styles for UI Designer */
+
+/* Scrollbar styling */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}
+
+/* Animation utilities */
+@keyframes slide-in-from-left-2 {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slide-in-from-right-2 {
+    from {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slide-in-from-right-4 {
+    from {
+        opacity: 0;
+        transform: translateX(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-in {
+    animation-duration: 200ms;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+}
+
+.slide-in-from-left-2 {
+    animation-name: slide-in-from-left-2;
+}
+
+.slide-in-from-right-2 {
+    animation-name: slide-in-from-right-2;
+}
+
+.slide-in-from-right-4 {
+    animation-name: slide-in-from-right-4;
+}
+
+.fade-in {
+    animation-name: fade-in;
+}
+
+.duration-200 {
+    animation-duration: 200ms;
+}
+
+.duration-300 {
+    animation-duration: 300ms;
+}
+
+/* Syntax highlighting improvements */
+.syntax-keyword { color: #c792ea; }
+.syntax-string { color: #c3e88d; }
+.syntax-number { color: #f78c6c; }
+.syntax-comment { color: #676e95; font-style: italic; }
+.syntax-function { color: #82aaff; }
+.syntax-variable { color: #f07178; }
+.syntax-class { color: #ffcb6b; }
+.syntax-tag { color: #f07178; }
+.syntax-attribute { color: #c792ea; }
+
+/* Custom checkbox styling */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #525252;
+    border-radius: 4px;
+    background: #1a1a1a;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+}
+
+input[type="checkbox"]:checked {
+    background: #ec4899;
+    border-color: #ec4899;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2);
+}
+
+/* Code block enhancements */
+pre {
+    tab-size: 2;
+    -moz-tab-size: 2;
+}
+
+/* Selection styling */
+::selection {
+    background: rgba(236, 72, 153, 0.3);
+}
+
+/* Focus visible styling */
+:focus-visible {
+    outline: 2px solid rgba(236, 72, 153, 0.5);
+    outline-offset: 2px;
+}
+
+/* Button hover effects */
+button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+/* Glass morphism effect for panels */
+.glass-panel {
+    background: rgba(20, 20, 20, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Gradient text */
+.gradient-text {
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Loading shimmer effect */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(
+            90deg,
+            #1a1a1a 25%,
+            #262626 50%,
+            #1a1a1a 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Pulse glow effect */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(236, 72, 153, 0);
+    }
+}
+
+.pulse-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+/* Bounce animation for dots */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.animate-bounce {
+    animation: bounce 0.6s ease-in-out infinite;
+}

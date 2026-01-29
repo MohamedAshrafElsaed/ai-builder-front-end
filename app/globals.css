@@ -980,3 +980,233 @@ code {
     padding-bottom: max(32px, env(safe-area-inset-bottom));
   }
 }
+
+/* Add these to your existing globals.css for UI Designer support */
+
+/* =============================================================================
+   UI DESIGNER SPECIFIC STYLES
+   ============================================================================= */
+
+/* Scrollbar styling for dark theme */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Custom animations */
+@keyframes slide-in-from-left-2 {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-from-right-2 {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-from-right-4 {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-in {
+  animation-duration: 200ms;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.slide-in-from-left-2 {
+  animation-name: slide-in-from-left-2;
+}
+
+.slide-in-from-right-2 {
+  animation-name: slide-in-from-right-2;
+}
+
+.slide-in-from-right-4 {
+  animation-name: slide-in-from-right-4;
+}
+
+.duration-200 {
+  animation-duration: 200ms;
+}
+
+.duration-300 {
+  animation-duration: 300ms;
+}
+
+/* Custom checkbox styling */
+input[type="checkbox"].ui-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #525252;
+  border-radius: 4px;
+  background: #1a1a1a;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+input[type="checkbox"].ui-checkbox:checked {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+input[type="checkbox"].ui-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+input[type="checkbox"].ui-checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2);
+}
+
+/* Code block enhancements */
+pre.code-viewer {
+  tab-size: 2;
+  -moz-tab-size: 2;
+}
+
+/* Typing cursor animation */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.typing-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+/* Gradient text utility */
+.gradient-text-pink {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Loading shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #1a1a1a 25%, #262626 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Pulse glow for status indicators */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(236, 72, 153, 0); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Bounce animation for loading dots */
+@keyframes bounce-dot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-bounce-dot {
+  animation: bounce-dot 0.6s ease-in-out infinite;
+}
+
+/* Focus visible ring for accessibility */
+.focus-ring:focus-visible {
+  outline: 2px solid rgba(236, 72, 153, 0.5);
+  outline-offset: 2px;
+}
+
+/* Button active state */
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Glass morphism panel */
+.glass-panel {
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Selection styling */
+.ui-designer ::selection {
+  background: rgba(236, 72, 153, 0.3);
+}
+
+/* Syntax highlighting colors */
+.syntax-keyword { color: #c792ea; }
+.syntax-string { color: #c3e88d; }
+.syntax-number { color: #f78c6c; }
+.syntax-comment { color: #676e95; font-style: italic; }
+.syntax-function { color: #82aaff; }
+.syntax-variable { color: #f07178; }
+.syntax-class { color: #ffcb6b; }
+.syntax-tag { color: #f07178; }
+.syntax-attribute { color: #c792ea; }
+
+/* Theme tokens for UI Designer dark mode */
+.ui-designer {
+  --ui-bg-base: #0a0a0a;
+  --ui-bg-surface: #141414;
+  --ui-bg-elevated: #1a1a1a;
+  --ui-bg-hover: #262626;
+  --ui-border-subtle: #1f1f1f;
+  --ui-border-default: #262626;
+  --ui-border-strong: #333333;
+  --ui-text-primary: #fafafa;
+  --ui-text-secondary: #a1a1aa;
+  --ui-text-muted: #71717a;
+  --ui-accent: #ec4899;
+  --ui-accent-hover: #db2777;
+  --ui-success: #22c55e;
+  --ui-error: #ef4444;
+  --ui-warning: #f59e0b;
+}

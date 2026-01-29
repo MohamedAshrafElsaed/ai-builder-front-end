@@ -28,29 +28,22 @@ class ApiClient {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
 
-        // Normalize URL
+        // Build URL without adding trailing slash
         let url = `${this.baseURL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 
-        // Append trailing slash if no query params in endpoint string and not ending in slash
-        // Strategy: Split potential query string in endpoint first
-        const [path, qs] = url.split("?");
-        let normalizedPath = path;
-        if (!normalizedPath.endsWith("/")) {
-            normalizedPath += "/";
-        }
-
-        // Reconstruct URL with query params
-        const searchParams = new URLSearchParams(qs || "");
+        // Add query params if provided
         if (query) {
+            const searchParams = new URLSearchParams();
             Object.entries(query).forEach(([key, value]) => {
                 if (value !== undefined && value !== null) {
                     searchParams.append(key, String(value));
                 }
             });
+            const queryString = searchParams.toString();
+            if (queryString) {
+                url += (url.includes('?') ? '&' : '?') + queryString;
+            }
         }
-
-        const queryString = searchParams.toString();
-        url = normalizedPath + (queryString ? `?${queryString}` : "");
 
         const headers = new Headers({
             "Content-Type": "application/json",
@@ -73,16 +66,13 @@ class ApiClient {
 
             if (!response.ok) {
                 const data = await response.json().catch(() => ({}));
-
-                // Normalize error structure
-                // Backend returns: { error: { code, message, ... } }
-                const errorBody = data.error || {};
+                const errorBody = data.error || data.detail || {};
 
                 const error: ApiError = {
                     status: response.status,
                     code: errorBody.code || "UNKNOWN_ERROR",
-                    message: errorBody.message || response.statusText,
-                    details: errorBody.details,
+                    message: typeof errorBody === 'string' ? errorBody : (errorBody.message || response.statusText),
+                    details: errorBody.details || data,
                     request_id: errorBody.request_id
                 };
                 throw error;

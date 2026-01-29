@@ -1,3 +1,4 @@
+// components/layout/Sidebar.tsx - Updated with UI Designer link
 "use client";
 
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { useEffect } from "react";
 const NAV_ITEMS = [
     { label: "Overview", href: "/app", icon: HomeIcon },
     { label: "Projects", href: "/app/projects", icon: FolderIcon },
+    { label: "UI Designer", href: "/app/ui-designer", icon: PaletteIcon, badge: "AI" },
     { label: "Chat", href: "/app/chat", icon: ChatIcon },
     { label: "Settings", href: "/app/settings", icon: CogIcon },
     { label: "Billing", href: "/app/billing", icon: CreditCardIcon },
@@ -19,27 +21,23 @@ export function Sidebar() {
     const { isSidebarOpen, isDrawerOpen, closeDrawer } = useApp();
     const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-    // Close drawer on route change (mobile)
     useEffect(() => {
         closeDrawer();
     }, [pathname]);
 
-    // Desktop Sidebar
     if (isDesktop) {
         return (
             <aside
                 className={`fixed left-0 top-14 bottom-0 z-30 flex flex-col border-r border-border-subtle bg-bg-base transition-all duration-300 ${isSidebarOpen ? "w-64" : "w-16"
-                    }`}
+                }`}
             >
                 <NavContent collapsed={!isSidebarOpen} />
             </aside>
         );
     }
 
-    // Mobile Drawer
     return (
         <>
-            {/* Backdrop */}
             {isDrawerOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
@@ -47,10 +45,9 @@ export function Sidebar() {
                 />
             )}
 
-            {/* Drawer */}
             <aside
                 className={`fixed inset-y-0 left-0 z-50 w-64 bg-bg-base shadow-xl transition-transform duration-300 ${isDrawerOpen ? "translate-x-0" : "-translate-x-full"
-                    }`}
+                }`}
             >
                 <div className="flex h-14 items-center border-b border-border-subtle px-6">
                     <span className="font-semibold text-text-primary">Laravel AI</span>
@@ -67,21 +64,30 @@ function NavContent({ collapsed }: { collapsed: boolean }) {
     return (
         <nav className="flex-1 space-y-1 p-3">
             {NAV_ITEMS.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                 return (
                     <Link
                         key={item.href}
                         href={item.href}
                         className={`group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
-                                ? "bg-accent-primary/10 text-accent-primary"
-                                : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
-                            }`}
+                            ? "bg-accent-primary/10 text-accent-primary"
+                            : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
+                        }`}
                     >
                         <item.icon
                             className={`h-5 w-5 flex-shrink-0 ${isActive ? "text-accent-primary" : "text-text-secondary group-hover:text-text-primary"
-                                }`}
+                            }`}
                         />
-                        {!collapsed && <span className="ml-3">{item.label}</span>}
+                        {!collapsed && (
+                            <span className="ml-3 flex-1 flex items-center justify-between">
+                                {item.label}
+                                {item.badge && (
+                                    <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-accent-primary/20 text-accent-primary">
+                                        {item.badge}
+                                    </span>
+                                )}
+                            </span>
+                        )}
                     </Link>
                 );
             })}
@@ -102,6 +108,14 @@ function FolderIcon({ className }: { className?: string }) {
     return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        </svg>
+    );
+}
+
+function PaletteIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
         </svg>
     );
 }
