@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from 'react';
-import { GeneratedFile, getFileIcon } from '@/types/ui-designer';
+import { GeneratedFile } from '@/types/ui-designer';
+import {
+    FolderIcon, FolderOpenIcon, FileCodeIcon, FileIcon,
+    ChevronRightIcon, ReactIcon, VueIcon, CssIcon, LayersIcon
+} from '@/components/ui/Icons';
 
 interface FileTreeProps {
     files: GeneratedFile[];
@@ -20,6 +24,24 @@ interface TreeNode {
     fileIndex?: number;
 }
 
+function getFileIcon(language: string, className: string = "w-4 h-4") {
+    switch (language) {
+        case 'tsx':
+        case 'jsx':
+            return <ReactIcon className={`${className} text-[#61DAFB]`} />;
+        case 'vue':
+            return <VueIcon className={`${className} text-[#42B883]`} />;
+        case 'css':
+        case 'scss':
+            return <CssIcon className={`${className} text-[#264de4]`} />;
+        case 'ts':
+        case 'js':
+            return <FileCodeIcon className={`${className} text-status-warning`} />;
+        default:
+            return <FileIcon className={`${className} text-text-muted`} />;
+    }
+}
+
 export function FileTree({
                              files,
                              selectedIndex,
@@ -29,7 +51,6 @@ export function FileTree({
                          }: FileTreeProps) {
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-    // Build tree structure from flat file list
     const tree = useMemo(() => {
         const root: TreeNode = { name: 'root', path: '', isFolder: true, children: [] };
 
@@ -58,7 +79,6 @@ export function FileTree({
             });
         });
 
-        // Sort: folders first, then alphabetically
         const sortNodes = (nodes: TreeNode[]): TreeNode[] => {
             return nodes.sort((a, b) => {
                 if (a.isFolder && !b.isFolder) return -1;
@@ -73,7 +93,6 @@ export function FileTree({
         return sortNodes(root.children);
     }, [files]);
 
-    // Expand all folders by default
     useMemo(() => {
         const allFolders = new Set<string>();
         const collectFolders = (nodes: TreeNode[]) => {
@@ -104,11 +123,11 @@ export function FileTree({
         return (
             <div className="h-full flex items-center justify-center">
                 <div className="text-center p-8">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#1a1a1a] border border-[#262626] flex items-center justify-center">
-                        <span className="text-3xl">📁</span>
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-bg-elevated border border-border-subtle flex items-center justify-center">
+                        <LayersIcon className="w-8 h-8 text-text-muted" />
                     </div>
-                    <h3 className="text-lg font-semibold text-zinc-200 mb-2">No Files Yet</h3>
-                    <p className="text-sm text-zinc-500">Generated files will appear here.</p>
+                    <h3 className="text-base font-semibold text-text-primary mb-2">No Files Yet</h3>
+                    <p className="text-sm text-text-muted">Generated files will appear here.</p>
                 </div>
             </div>
         );
@@ -117,9 +136,9 @@ export function FileTree({
     return (
         <div className="h-full overflow-auto p-4 scrollbar-thin">
             <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-medium text-zinc-400">Generated Files</h3>
-                <span className="text-xs text-zinc-600">
-                    {selectedForApply.size} of {files.length} selected
+                <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Generated Files</h3>
+                <span className="text-xs text-text-muted">
+                    {selectedForApply.size}/{files.length}
                 </span>
             </div>
 
@@ -172,14 +191,18 @@ function TreeNodeItem({
             <div>
                 <button
                     onClick={() => onToggle(node.path)}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left hover:bg-[#1a1a1a] transition-colors"
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left hover:bg-bg-elevated transition-colors group"
                     style={{ paddingLeft: `${depth * 12 + 8}px` }}
                 >
-                    <span className={`text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
-                        ▶
-                    </span>
-                    <span className="text-sm">📁</span>
-                    <span className="text-sm text-zinc-300 truncate">{node.name}</span>
+                    <ChevronRightIcon
+                        className={`w-3 h-3 text-text-muted transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                    />
+                    {isExpanded ? (
+                        <FolderOpenIcon className="w-4 h-4 text-accent-primary" />
+                    ) : (
+                        <FolderIcon className="w-4 h-4 text-text-secondary group-hover:text-accent-primary" />
+                    )}
+                    <span className="text-sm text-text-primary truncate">{node.name}</span>
                 </button>
                 {isExpanded && (
                     <div>
@@ -204,51 +227,40 @@ function TreeNodeItem({
 
     return (
         <div
-            className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
+            className={`flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-all ${
                 isSelected
-                    ? 'bg-pink-500/10 border border-pink-500/20'
-                    : 'hover:bg-[#1a1a1a] border border-transparent'
+                    ? 'bg-accent-primary/10 border border-accent-primary/30'
+                    : 'hover:bg-bg-elevated border border-transparent'
             }`}
             style={{ paddingLeft: `${depth * 12 + 8}px` }}
             onClick={() => node.fileIndex !== undefined && onSelect(node.fileIndex)}
         >
-            {/* Checkbox */}
-            <label
-                className="flex-shrink-0"
-                onClick={(e) => e.stopPropagation()}
-            >
+            <label className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                 <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => node.file && onToggleApply(node.file.path)}
-                    className="w-4 h-4 rounded border-zinc-600 bg-[#1a1a1a] text-pink-500 focus:ring-pink-500/20 focus:ring-offset-0 cursor-pointer"
+                    className="w-4 h-4 rounded cursor-pointer"
                 />
             </label>
 
-            {/* Icon */}
-            <span className="text-sm flex-shrink-0">
-                {node.file ? getFileIcon(node.file.language) : '📄'}
-            </span>
+            {node.file && getFileIcon(node.file.language)}
 
-            {/* Name */}
-            <span className={`text-sm truncate flex-1 ${isSelected ? 'text-pink-400' : 'text-zinc-300'}`}>
+            <span className={`text-sm truncate flex-1 ${isSelected ? 'text-accent-primary font-medium' : 'text-text-primary'}`}>
                 {node.name}
             </span>
 
-            {/* File info */}
             {node.file && (
                 <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-xs text-zinc-600">
-                        {node.file.line_count}L
-                    </span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                    <span className="text-xs text-text-muted">{node.file.line_count}L</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
                         node.file.type === 'component'
-                            ? 'bg-purple-500/10 text-purple-400'
+                            ? 'bg-accent-primary/10 text-accent-primary'
                             : node.file.type === 'style'
-                                ? 'bg-cyan-500/10 text-cyan-400'
+                                ? 'bg-status-info/10 text-status-info'
                                 : node.file.type === 'test'
-                                    ? 'bg-green-500/10 text-green-400'
-                                    : 'bg-zinc-500/10 text-zinc-400'
+                                    ? 'bg-status-success/10 text-status-success'
+                                    : 'bg-bg-elevated text-text-muted'
                     }`}>
                         {node.file.type}
                     </span>

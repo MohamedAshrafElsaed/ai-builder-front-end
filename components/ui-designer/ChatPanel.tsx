@@ -1,10 +1,11 @@
 "use client";
 
-import {KeyboardEvent, useEffect, useRef, useState} from 'react';
-import {Agent, DesignStatus, Message, TechStack} from '@/types/ui-designer';
-import {MessageBubble} from './MessageBubble';
-import {ThinkingIndicator} from './ThinkingIndicator';
-import {TechStackBadge} from './TechStackBadge';
+import { KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { Agent, DesignStatus, Message, TechStack } from '@/types/ui-designer';
+import { MessageBubble } from './MessageBubble';
+import { ThinkingIndicator } from './ThinkingIndicator';
+import { TechStackBadge } from './TechStackBadge';
+import { SparklesIcon, SendIcon, XIcon, ZapIcon } from '@/components/ui/Icons';
 
 interface ChatPanelProps {
     agent: Agent | null;
@@ -24,24 +25,22 @@ const SUGGESTIONS = [
     "Sidebar navigation",
 ];
 
-export function ChatPanel(
-    {
-        agent,
-        messages,
-        currentThought,
-        techStack,
-        status,
-        isGenerating,
-        onSendMessage,
-        onCancel,
-    }: ChatPanelProps) {
+export function ChatPanel({
+                              agent,
+                              messages,
+                              currentThought,
+                              techStack,
+                              status,
+                              isGenerating,
+                              onSendMessage,
+                              onCancel,
+                          }: ChatPanelProps) {
     const [input, setInput] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, currentThought]);
 
     useEffect(() => {
@@ -69,49 +68,62 @@ export function ChatPanel(
         }
     };
 
+    const getStatusText = () => {
+        switch (status) {
+            case 'generating': return 'Generating...';
+            case 'connecting': return 'Connecting...';
+            case 'detecting': return 'Analyzing...';
+            case 'complete': return 'Ready';
+            case 'error': return 'Error';
+            default: return 'Online';
+        }
+    };
+
+    const getStatusColor = () => {
+        switch (status) {
+            case 'generating':
+            case 'connecting':
+            case 'detecting': return 'bg-accent-primary';
+            case 'complete': return 'bg-status-success';
+            case 'error': return 'bg-status-error';
+            default: return 'bg-status-success';
+        }
+    };
+
     return (
-        <div className="flex flex-col h-full bg-[#09090b]">
+        <div className="flex flex-col h-full bg-bg-base">
             {/* Header */}
-            <div className="flex-shrink-0 px-4 py-3 border-b border-white/5">
+            <div className="flex-shrink-0 px-4 py-3 border-b border-border-subtle bg-bg-surface">
                 <div className="flex items-center gap-3">
                     <div className="relative">
-                        <div
-                            className="w-9 h-9 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-violet-500/20 flex items-center justify-center ring-1 ring-white/10">
-                            <span className="text-base">{agent?.avatar_emoji || '🎨'}</span>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 border border-accent-primary/20 flex items-center justify-center">
+                            <SparklesIcon className="w-5 h-5 text-accent-primary" />
                         </div>
-                        <div
-                            className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#09090b] ${
-                                status === 'generating' ? 'bg-fuchsia-500 animate-pulse' :
-                                    status === 'complete' ? 'bg-emerald-500' :
-                                        status === 'error' ? 'bg-red-500' : 'bg-zinc-600'
-                            }`}/>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-bg-surface ${getStatusColor()} ${status === 'generating' ? 'animate-pulse' : ''}`} />
                     </div>
                     <div>
-                        <h2 className="text-sm font-medium text-zinc-100">{agent?.name || 'Palette'}</h2>
-                        <p className="text-[11px] text-zinc-500">{
-                            status === 'generating' ? 'Generating...' :
-                                status === 'complete' ? 'Ready' : 'Online'
-                        }</p>
+                        <h2 className="text-sm font-semibold text-text-primary">{agent?.name || 'Palette'}</h2>
+                        <p className="text-xs text-text-muted">{getStatusText()}</p>
                     </div>
                 </div>
             </div>
 
             {/* Messages */}
-            <div ref={containerRef} className="flex-1 overflow-y-auto scrollbar-thin">
+            <div className="flex-1 overflow-y-auto scrollbar-thin">
                 <div className="px-4 py-4 space-y-4">
-                    {techStack && <TechStackBadge techStack={techStack}/>}
+                    {techStack && <TechStackBadge techStack={techStack} />}
 
                     {messages.map((message) => (
-                        <MessageBubble key={message.id} message={message} agent={agent}/>
+                        <MessageBubble key={message.id} message={message} agent={agent} />
                     ))}
 
                     {currentThought && status !== 'complete' && (
-                        <ThinkingIndicator thought={currentThought} agent={agent}/>
+                        <ThinkingIndicator thought={currentThought} agent={agent} />
                     )}
 
                     {status === 'idle' && messages.length <= 2 && (
                         <div className="pt-6">
-                            <p className="text-[10px] text-zinc-600 uppercase tracking-wider mb-3">Quick start</p>
+                            <p className="text-[10px] text-text-muted uppercase tracking-wider font-medium mb-3">Quick start</p>
                             <div className="flex flex-wrap gap-2">
                                 {SUGGESTIONS.map((s, i) => (
                                     <button
@@ -120,8 +132,9 @@ export function ChatPanel(
                                             setInput(s);
                                             inputRef.current?.focus();
                                         }}
-                                        className="px-3 py-1.5 text-xs text-zinc-500 bg-white/[0.02] border border-white/5 rounded-full hover:bg-white/[0.05] hover:text-zinc-300 hover:border-white/10 transition-all"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-secondary bg-bg-surface border border-border-subtle rounded-lg hover:bg-bg-elevated hover:text-text-primary hover:border-border-default transition-all"
                                     >
+                                        <ZapIcon className="w-3 h-3" />
                                         {s}
                                     </button>
                                 ))}
@@ -129,54 +142,51 @@ export function ChatPanel(
                         </div>
                     )}
 
-                    <div ref={messagesEndRef}/>
+                    <div ref={messagesEndRef} />
                 </div>
             </div>
 
             {/* Input */}
-            <div className="flex-shrink-0 p-3 border-t border-white/5">
-                <div
-                    className="relative flex items-end gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-xl focus-within:border-fuchsia-500/30 focus-within:bg-white/[0.03] transition-all">
+            <div className="flex-shrink-0 p-3 border-t border-border-subtle bg-bg-surface">
+                <div className="relative flex items-end gap-2 p-1.5 bg-bg-base border border-border-default rounded-xl focus-within:border-accent-primary focus-within:ring-2 focus-within:ring-accent-primary/20 transition-all">
                     <textarea
                         ref={inputRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Describe the UI..."
+                        placeholder="Describe the UI you want to create..."
                         disabled={isGenerating}
                         rows={1}
-                        className="flex-1 px-3 py-2 bg-transparent text-sm text-zinc-100 placeholder:text-zinc-600 resize-none focus:outline-none disabled:opacity-50"
-                        style={{minHeight: '40px', maxHeight: '100px'}}
+                        className="flex-1 px-3 py-2.5 bg-transparent text-sm text-text-primary placeholder:text-text-muted resize-none focus:outline-none disabled:opacity-50"
+                        style={{ minHeight: '44px', maxHeight: '120px' }}
                         onInput={(e) => {
                             const t = e.target as HTMLTextAreaElement;
-                            t.style.height = '40px';
-                            t.style.height = Math.min(t.scrollHeight, 100) + 'px';
+                            t.style.height = '44px';
+                            t.style.height = Math.min(t.scrollHeight, 120) + 'px';
                         }}
                     />
                     {isGenerating ? (
                         <button
                             onClick={onCancel}
-                            className="p-2 m-1 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="p-2.5 m-0.5 text-status-error hover:bg-status-error/10 rounded-lg transition-colors"
+                            title="Cancel generation"
                         >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                 strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
+                            <XIcon className="w-5 h-5" />
                         </button>
                     ) : (
                         <button
                             onClick={handleSubmit}
                             disabled={!input.trim()}
-                            className="p-2 m-1 bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                            className="p-2.5 m-0.5 bg-gradient-to-r from-accent-primary to-accent-secondary text-white rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-accent-primary/25 transition-all"
+                            title="Send message"
                         >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                 strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round"
-                                      d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
-                            </svg>
+                            <SendIcon className="w-5 h-5" />
                         </button>
                     )}
                 </div>
+                <p className="mt-2 text-[10px] text-text-muted text-center">
+                    Press <kbd className="px-1.5 py-0.5 rounded bg-bg-elevated border border-border-subtle text-text-secondary">⌘K</kbd> to focus
+                </p>
             </div>
         </div>
     );

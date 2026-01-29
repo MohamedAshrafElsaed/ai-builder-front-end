@@ -1,6 +1,7 @@
 "use client";
 
-import {DesignResult, DesignStatus, GeneratedFile} from '@/types/ui-designer';
+import { DesignResult, DesignStatus, GeneratedFile } from '@/types/ui-designer';
+import { LoaderIcon, FileCodeIcon, HashIcon, ClockIcon, CheckIcon, XIcon } from '@/components/ui/Icons';
 
 interface ActionBarProps {
     status: DesignStatus;
@@ -34,26 +35,24 @@ export function ActionBar({
     const allSelected = selectedCount === totalFiles;
 
     return (
-        <footer
-            className="flex-shrink-0 h-14 flex items-center justify-between px-4 border-t border-[#262626] bg-[#141414]">
+        <footer className="flex-shrink-0 h-14 flex items-center justify-between px-4 border-t border-border-subtle bg-bg-surface">
             {/* Left: Stats */}
             <div className="flex items-center gap-4">
                 {isGenerating ? (
                     <div className="flex items-center gap-2">
-                        <div
-                            className="w-4 h-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"/>
-                        <span className="text-sm text-zinc-400">Generating...</span>
+                        <LoaderIcon className="w-4 h-4 text-accent-primary animate-spin" />
+                        <span className="text-sm text-text-secondary">Generating...</span>
                     </div>
                 ) : hasFiles ? (
                     <>
-                        <Stat icon="📄" value={totalFiles} label="files"/>
-                        <Stat icon="📝" value={totalLines} label="lines"/>
+                        <Stat icon={<FileCodeIcon className="w-4 h-4" />} value={totalFiles} label="files" />
+                        <Stat icon={<HashIcon className="w-4 h-4" />} value={totalLines} label="lines" />
                         {result && (
-                            <Stat icon="⏱️" value={`${(result.duration_ms / 1000).toFixed(1)}s`} label=""/>
+                            <Stat icon={<ClockIcon className="w-4 h-4" />} value={`${(result.duration_ms / 1000).toFixed(1)}s`} label="" />
                         )}
                     </>
                 ) : (
-                    <span className="text-sm text-zinc-500">Ready to generate UI</span>
+                    <span className="text-sm text-text-muted">Ready to generate UI</span>
                 )}
             </div>
 
@@ -62,17 +61,18 @@ export function ActionBar({
                 {isGenerating ? (
                     <button
                         onClick={onCancel}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-status-error bg-status-error/10 border border-status-error/20 rounded-lg hover:bg-status-error/20 transition-colors"
                     >
+                        <XIcon className="w-4 h-4" />
                         <span>Cancel</span>
-                        <kbd className="text-xs opacity-60">Esc</kbd>
+                        <kbd className="text-xs opacity-60 ml-1">Esc</kbd>
                     </button>
                 ) : hasFiles ? (
                     <>
                         {/* Selection toggle */}
                         <button
                             onClick={allSelected ? onDeselectAll : onSelectAll}
-                            className="px-3 py-2 text-xs text-zinc-400 hover:text-zinc-200 bg-[#1a1a1a] border border-[#262626] rounded-lg hover:border-[#333] transition-colors"
+                            className="px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary bg-bg-elevated border border-border-subtle rounded-lg hover:border-border-default transition-colors"
                         >
                             {allSelected ? 'Deselect All' : 'Select All'}
                         </button>
@@ -81,18 +81,18 @@ export function ActionBar({
                         <button
                             onClick={onApply}
                             disabled={selectedCount === 0 || isApplying}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-accent-primary to-accent-secondary rounded-lg hover:shadow-lg hover:shadow-accent-primary/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none transition-all"
                         >
                             {isApplying ? (
                                 <>
-                                    <div
-                                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                                    <LoaderIcon className="w-4 h-4 animate-spin" />
                                     <span>Applying...</span>
                                 </>
                             ) : (
                                 <>
+                                    <CheckIcon className="w-4 h-4" />
                                     <span>Apply {selectedCount > 0 ? `(${selectedCount})` : ''}</span>
-                                    <kbd className="text-xs opacity-60">⌘S</kbd>
+                                    <kbd className="text-xs opacity-60 ml-1">⌘S</kbd>
                                 </>
                             )}
                         </button>
@@ -104,17 +104,17 @@ export function ActionBar({
 }
 
 interface StatProps {
-    icon: string;
+    icon: React.ReactNode;
     value: number | string;
     label: string;
 }
 
-function Stat({icon, value, label}: StatProps) {
+function Stat({ icon, value, label }: StatProps) {
     return (
-        <div className="flex items-center gap-1.5 text-sm">
-            <span>{icon}</span>
-            <span className="font-medium text-zinc-200">{value}</span>
-            {label && <span className="text-zinc-500">{label}</span>}
+        <div className="flex items-center gap-2 text-sm">
+            <span className="text-text-muted">{icon}</span>
+            <span className="font-medium text-text-primary">{value}</span>
+            {label && <span className="text-text-muted">{label}</span>}
         </div>
     );
 }

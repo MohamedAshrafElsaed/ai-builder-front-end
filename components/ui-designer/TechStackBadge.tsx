@@ -1,34 +1,49 @@
 "use client";
 
 import { TechStack } from '@/types/ui-designer';
+import { ReactIcon, VueIcon, TypeScriptIcon, CssIcon, BoxIcon, CheckCircleIcon } from '@/components/ui/Icons';
 
 interface TechStackBadgeProps {
     techStack: TechStack;
 }
 
-const FRAMEWORK_ICONS: Record<string, string> = { react: '⚛️', vue: '💚', blade: '🔺', livewire: '⚡', unknown: '📦' };
-const CSS_ICONS: Record<string, string> = { tailwind: '🎨', bootstrap: '🅱️', custom: '✨', none: '📝' };
-
 export function TechStackBadge({ techStack }: TechStackBadgeProps) {
+    const getFrameworkIcon = (framework: string) => {
+        switch (framework) {
+            case 'react': return <ReactIcon className="w-3.5 h-3.5 text-[#61DAFB]" />;
+            case 'vue': return <VueIcon className="w-3.5 h-3.5 text-[#42B883]" />;
+            default: return <BoxIcon className="w-3.5 h-3.5 text-text-secondary" />;
+        }
+    };
+
     return (
         <div className="flex items-center gap-2 py-2 animate-in slide-in-from-left-2 duration-200 flex-wrap">
-            <span className="text-xs text-zinc-500">Detected:</span>
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#1a1a1a] border border-[#262626]">
-                <span>{FRAMEWORK_ICONS[techStack.framework] || '📦'}</span>
-                <span className="text-xs text-zinc-300 capitalize">{techStack.framework}</span>
+            <span className="text-[10px] uppercase tracking-wider text-text-muted font-medium">Detected</span>
+
+            {/* Framework */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle hover:border-border-default transition-colors">
+                {getFrameworkIcon(techStack.framework)}
+                <span className="text-xs text-text-primary capitalize font-medium">{techStack.framework}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#1a1a1a] border border-[#262626]">
-                <span>{CSS_ICONS[techStack.css_framework] || '🎨'}</span>
-                <span className="text-xs text-zinc-300 capitalize">{techStack.css_framework}</span>
+
+            {/* CSS Framework */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border-subtle hover:border-border-default transition-colors">
+                <CssIcon className="w-3.5 h-3.5 text-[#264de4]" />
+                <span className="text-xs text-text-primary capitalize font-medium">{techStack.css_framework}</span>
             </div>
+
+            {/* TypeScript */}
             {techStack.typescript && (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
-                    <span>📘</span>
-                    <span className="text-xs text-blue-400">TypeScript</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-status-info/10 border border-status-info/20">
+                    <TypeScriptIcon className="w-3.5 h-3.5 text-status-info" />
+                    <span className="text-xs text-status-info font-medium">TypeScript</span>
                 </div>
             )}
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20">
-                <span className="text-xs text-green-400">{Math.round(techStack.confidence * 100)}% confident</span>
+
+            {/* Confidence */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-status-success/10 border border-status-success/20">
+                <CheckCircleIcon className="w-3.5 h-3.5 text-status-success" />
+                <span className="text-xs text-status-success font-medium">{Math.round(techStack.confidence * 100)}%</span>
             </div>
         </div>
     );
